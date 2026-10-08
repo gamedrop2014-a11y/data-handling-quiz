@@ -124,140 +124,141 @@ const quizData = [
 
 // --- STATE VARIABLES ---
 let currentQuestionIndex = 0;
-let pointsScore = 0; // Tracks 1 point per question
+let pointsScore = 0;
 let studentName = "";
-let isProcessingAnswer = false; // Prevents double-clicking options during feedback window
+let isProcessingAnswer = false;
 
-// --- DOM ELEMENTS ---
-const screens = {
-  loading: document.getElementById('loading-screen'),
-  login: document.getElementById('login-screen'),
-  game: document.getElementById('game-screen'),
-  score: document.getElementById('score-screen')
-};
+// --- INITIALIZE IMMEDIATELY ---
+function initQuiz() {
+  const screens = {
+    loading: document.getElementById('loading-screen'),
+    login: document.getElementById('login-screen'),
+    game: document.getElementById('game-screen'),
+    score: document.getElementById('score-screen')
+  };
 
-// --- SYSTEM INITIALIZATION ---
-window.addEventListener('DOMContentLoaded', () => {
+  function switchScreen(screenKey) {
+    Object.keys(screens).forEach(key => {
+      if(screens[key]) screens[key].classList.remove('active');
+    });
+    if(screens[screenKey]) screens[screenKey].classList.add('active');
+  }
+
+  // Auto transition from loading screen to name screen after 2 seconds
   setTimeout(() => {
     switchScreen('login');
-  }, 2500);
-  
-  setupEventListeners();
-});
+  }, 2000);
 
-// --- NAVIGATION CORE ---
-function switchScreen(screenKey) {
-  Object.keys(screens).forEach(key => {
-    screens[key].classList.remove('active');
-  });
-  screens[screenKey].classList.add('active');
-}
-
-// --- INPUT & INTERACTION HANDLING ---
-function setupEventListeners() {
   const nameInput = document.getElementById('student-name');
   const startBtn = document.getElementById('start-btn');
   const restartBtn = document.getElementById('restart-btn');
 
-  nameInput.addEventListener('input', (e) => {
-    startBtn.disabled = e.target.value.trim().length < 2;
-  });
+  if(nameInput && startBtn) {
+    nameInput.addEventListener('input', (e) => {
+      startBtn.disabled = e.target.value.trim().length < 2;
+    });
 
-  startBtn.addEventListener('click', () => {
-    studentName = nameInput.value.trim();
-    document.getElementById('display-student-name').innerHTML = `Student: ${studentName} &nbsp;&nbsp; <span id="score-counter">Points: 0</span>`;
-    startQuiz();
-  });
-
-  restartBtn.addEventListener('click', () => {
-    currentQuestionIndex = 0;
-    pointsScore = 0;
-    nameInput.value = "";
-    startBtn.disabled = true;
-    switchScreen('login');
-  });
-}
-
-// --- GAME LOGIC ---
-function startQuiz() {
-  switchScreen('game');
-  loadQuestion();
-}
-
-function loadQuestion() {
-  isProcessingAnswer = false;
-  const currentQuestion = quizData[currentQuestionIndex];
-  
-  document.getElementById('progress').innerText = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
-  document.getElementById('data-visual').innerText = currentQuestion.visual;
-  document.getElementById('question-text').innerText = currentQuestion.question;
-  
-  const optionsContainer = document.getElementById('options-container');
-  optionsContainer.innerHTML = "";
-  
-  currentQuestion.options.forEach(option => {
-    const btn = document.createElement('button');
-    btn.classList.add('option-btn');
-    btn.innerText = option;
-    btn.addEventListener('click', (e) => handleAnswerSubmit(option, e.target));
-    optionsContainer.appendChild(btn);
-  });
-}
-
-function handleAnswerSubmit(selectedOption, clickedButton) {
-  if (isProcessingAnswer) return; 
-  isProcessingAnswer = true; 
-
-  const currentQuestion = quizData[currentQuestionIndex];
-  const allButtons = document.querySelectorAll('.option-btn');
-  
-  // Disable all choice inputs during visual validation loop
-  allButtons.forEach(btn => btn.disabled = true);
-
-  // Evaluate points logic (1 point per correct answer)
-  if (selectedOption === currentQuestion.answer) {
-    pointsScore++;
-    clickedButton.classList.add('correct-choice');
-    document.getElementById('score-counter').innerText = `Points: ${pointsScore}`;
-  } else {
-    clickedButton.classList.add('incorrect-choice');
-    // Highlight the correct answer item so the student can learn immediately
-    allButtons.forEach(btn => {
-      if (btn.innerText === currentQuestion.answer) {
-        btn.classList.add('correct-choice');
+    startBtn.addEventListener('click', () => {
+      studentName = nameInput.value.trim();
+      const nameDisplay = document.getElementById('display-student-name');
+      if(nameDisplay) {
+        nameDisplay.innerHTML = `Student: ${studentName} &nbsp;&nbsp; <span id="score-counter">Points: 0</span>`;
       }
+      switchScreen('game');
+      loadQuestion();
     });
   }
-  
-  // Short delay to display status before updating system layout
-  setTimeout(() => {
-    currentQuestionIndex++;
-    if (currentQuestionIndex < quizData.length) {
-      loadQuestion();
-    } else {
-      showProjectSummary();
+
+  if(restartBtn) {
+    restartBtn.addEventListener('click', () => {
+      currentQuestionIndex = 0;
+      pointsScore = 0;
+      if(nameInput) nameInput.value = "";
+      if(startBtn) startBtn.disabled = true;
+      switchScreen('login');
+    });
+  }
+
+  function loadQuestion() {
+    isProcessingAnswer = false;
+    const currentQuestion = quizData[currentQuestionIndex];
+    
+    const progressEl = document.getElementById('progress');
+    const visualEl = document.getElementById('data-visual');
+    const textEl = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+
+    if(progressEl) progressEl.innerText = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+    if(visualEl) visualEl.innerText = currentQuestion.visual;
+    if(textEl) textEl.innerText = currentQuestion.question;
+    
+    if(optionsContainer) {
+      optionsContainer.innerHTML = "";
+      currentQuestion.options.forEach(option => {
+        const btn = document.createElement('button');
+        btn.classList.add('option-btn');
+        btn.innerText = option;
+        btn.addEventListener('click', (e) => handleAnswerSubmit(option, e.target));
+        optionsContainer.appendChild(btn);
+      });
     }
-  }, 1500);
+  }
+
+  function handleAnswerSubmit(selectedOption, clickedButton) {
+    if (isProcessingAnswer) return; 
+    isProcessingAnswer = true; 
+
+    const currentQuestion = quizData[currentQuestionIndex];
+    const allButtons = document.querySelectorAll('.option-btn');
+    
+    allButtons.forEach(btn => btn.disabled = true);
+
+    if (selectedOption === currentQuestion.answer) {
+      pointsScore++;
+      clickedButton.classList.add('correct-choice');
+      const counterEl = document.getElementById('score-counter');
+      if(counterEl) counterEl.innerText = `Points: ${pointsScore}`;
+    } else {
+      clickedButton.classList.add('incorrect-choice');
+      allButtons.forEach(btn => {
+        if (btn.innerText === currentQuestion.answer) {
+          btn.classList.add('correct-choice');
+        }
+      });
+    }
+    
+    setTimeout(() => {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < quizData.length) {
+        loadQuestion();
+      } else {
+        switchScreen('score');
+        
+        const finalScoreEl = document.getElementById('final-score');
+        const totalScoreEl = document.getElementById('total-score');
+        const reportNameEl = document.getElementById('report-name');
+        const feedbackEl = document.getElementById('performance-feedback');
+
+        if(finalScoreEl) finalScoreEl.innerText = pointsScore;
+        if(totalScoreEl) totalScoreEl.innerText = quizData.length;
+        if(reportNameEl) reportNameEl.innerText = studentName;
+        
+        const percentage = (pointsScore / quizData.length) * 100;
+        let feedback = "";
+        
+        if (percentage === 100) {
+          feedback = "Excellent Master of Data Analytics! Perfect Score!";
+        } else if (percentage >= 70) {
+          feedback = "Good Data Interpreter. Keep practicing!";
+        } else {
+          feedback = "Needs review. Re-evaluate structural fundamentals.";
+        }
+        
+        if(feedbackEl) feedbackEl.innerText = feedback;
+      }
+    }, 1500);
+  }
 }
 
-// --- EVALUATION & FINAL REPORT ---
-function showProjectSummary() {
-  switchScreen('score');
-  
-  document.getElementById('final-score').innerText = pointsScore;
-  document.getElementById('total-score').innerText = quizData.length;
-  document.getElementById('report-name').innerText = studentName;
-  
-  const percentage = (pointsScore / quizData.length) * 100;
-  let feedback = "";
-  
-  if (percentage === 100) {
-    feedback = "Excellent Master of Data Analytics! Perfect Score!";
-  } else if (percentage >= 70) {
-    feedback = "Good Data Interpreter. Keep practicing!";
-  } else {
-    feedback = "Needs review. Re-evaluate structural fundamentals.";
-  }
-  
-  document.getElementById('performance-feedback').innerText = feedback;
-}
+// Run the script directly
+initQuiz();
