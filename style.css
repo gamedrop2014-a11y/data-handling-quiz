@@ -61,7 +61,7 @@ body {
   width: 100vw;
   height: 100vh;
   z-index: 9999;
-  display: none; /* FIXED: Prevents the loader from overlaying the application permanently */
+  display: none;
 }
 
 #loading-screen h1 {
@@ -142,13 +142,72 @@ button:disabled {
   padding: 15px;
   margin-bottom: 20px;
   font-family: monospace;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: #66fcf1;
   border-left: 4px solid #45f3ff;
   white-space: pre-wrap;
   word-wrap: break-word;
+  text-align: left;
 }
 
+/* DYNAMIC GRAPH STYLING */
+.graph-container {
+  background: #0b0c10;
+  border: 1px solid #1f2833;
+  border-radius: 8px;
+  padding: 20px 10px 10px 10px;
+  margin-bottom: 20px;
+  display: none; /* Managed by JS dynamically */
+  height: 180px;
+  position: relative;
+}
+
+.chart-area {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 100%;
+  width: 100%;
+}
+
+.bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-grow: 1;
+  max-width: 50px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.bar {
+  background: linear-gradient(to top, #45f3ff, #66fcf1);
+  width: 70%;
+  border-radius: 4px 4px 0 0;
+  animation: growUp 0.6s ease-out forwards;
+  position: relative;
+  min-height: 5px;
+}
+
+.bar-value {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: #45f3ff;
+  font-family: monospace;
+  font-weight: bold;
+}
+
+.bar-label {
+  font-size: 0.8rem;
+  color: #c5c6c7;
+  margin-top: 6px;
+  font-family: monospace;
+}
+
+/* Options Selector Styling */
 .options-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -170,7 +229,6 @@ button:disabled {
   background: #34495e;
 }
 
-/* Instant Feedback Structural Adjustments */
 .option-btn.correct-choice {
   background-color: #2e7d32 !important;
   border-color: #4caf50 !important;
@@ -183,7 +241,6 @@ button:disabled {
   color: #ffffff !important;
 }
 
-/* Score counter element styling */
 #score-counter {
   color: #45f3ff;
   font-size: 1rem;
@@ -193,7 +250,7 @@ button:disabled {
   border: 1px dashed #45f3ff;
 }
 
-/* Summary / Report Card */
+/* Summary Cards */
 .summary-card h2 {
   color: #66fcf1;
   margin-bottom: 15px;
@@ -219,7 +276,7 @@ button:disabled {
   color: #66fcf1;
 }
 
-/* Animations */
+/* Keyframe Animations */
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -228,4 +285,8 @@ button:disabled {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes growUp {
+  from { height: 0; }
 }
