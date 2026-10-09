@@ -1,11 +1,10 @@
-// --- PROJECT CONFIGURATION & DATA (GRAPH METRICS LINKED) ---
+// --- PROJECT CONFIGURATION & DATA (ALL VALUES COMPLETED) ---
 const quizData = [
   {
     visual: "Scenario: Ashish studies on three consecutive days.",
     question: "What is the average number of hours he studies daily?",
     options: ["3 hours", "4 hours", "5 hours", "12 hours"],
     answer: "4 hours",
-    // Added native graph mapping configurations
     graphData: { labels: ["Day 1", "Day 2", "Day 3"], values: [4, 5, 3] }
   },
   {
@@ -26,7 +25,7 @@ const quizData = [
     question: "The mode of the distribution is __________.",
     options: ["7", "4", "3", "1"],
     answer: "4",
-    graphData: { labels: ["1", "2", "3", "4", "5"], values: [1, 1, 2, 3, 1] } // frequency tracking map
+    graphData: { labels: ["1", "2", "3", "4", "5"], values: [1, 1, 2, 3, 1] }
   },
   {
     visual: "Dataset Matrix.",
@@ -40,7 +39,7 @@ const quizData = [
     question: "According to the tally data, which margin of victory occurs most frequently (14 times) and represents the mode?",
     options: ["1", "2", "6", "14"],
     answer: "2",
-    graphData: { labels: ["Marg 1", "Marg 2", "Marg 3", "Marg 4"], values: [9, 14, 7, 2] }
+    graphData: { labels: ["Marg 1", "Marg 2", "Marg 3", "Marg 4"], values: [5, 14, 7, 3] }
   },
   {
     visual: "Dataset Stream.",
@@ -162,7 +161,7 @@ startBtn.addEventListener('click', () => {
   loadQuestion();
 });
 
-// --- CORE CORE INTERACTIVE ENGINE RENDERER ---
+// --- CORE INTERACTIVE ENGINE RENDERER ---
 function loadQuestion() {
   const currentData = quizData[currentQuestionIndex];
   progressText.textContent = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
@@ -263,3 +262,6 @@ function renderSummaryReport() {
 
 restartBtn.addEventListener('click', () => {
   inputName.value = '';
+  startBtn.disabled = true;
+  showScreen(screens.login);
+});
