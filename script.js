@@ -31,18 +31,6 @@ const quizData = [
     answer: "7"
   },
   {
-    visual: "Tally Table: Margins of Victory in Matches",
-    question: "According to the tally table data, which margin of victory occurs most frequently (14 times) and represents the mode?",
-    options: ["1", "2", "6", "14"],
-    answer: "2"
-  },
-  {
-    visual: "Dataset: 6, 15, 120, 50, 100, 80, 10, 15, 8, 10, 15",
-    question: "What is the median value for this dataset?",
-    options: ["10", "15", "50", "100"],
-    answer: "15"
-  },
-  {
     visual: "Dataset: Marks obtained in a Science Test: 85, 76, 90, 85, 39, 48, 56, 95, 81, and 75.",
     question: "What is the range of these marks? (Highest - Lowest)",
     options: ["39", "48", "56", "95"],
@@ -85,22 +73,10 @@ const quizData = [
     answer: "3/13"
   },
   {
-    visual: "Probability Scenario: A box contains 8 red, 7 blue, and 6 green balls.",
-    question: "One ball is picked up randomly. What is the probability that it is neither red nor green (meaning it must be blue)?",
-    options: ["2/3", "3/4", "7/21", "7/19"],
-    answer: "7/19"
-  },
-  {
     visual: "Equation Rule: The mean of 6, y, 7, x, and 14 is 8.",
     question: "Which of the following equations must be true?",
     options: ["x + y = 13", "x - y = 13", "2x + 3y = 13", "x^2 + y^2 = 15"],
     answer: "x + y = 13"
-  },
-  {
-    visual: "Empirical Formula",
-    question: "What is the correct empirical relation between mean, median, and mode?",
-    options: ["Mode = 3(Median) - 2(Mean)", "Mode = 2(Median) - 3(Mean)", "Mode = 3(Mean) - 2(Median)", "Mode = 2(Mean) - 3(Median)"],
-    answer: "Mode = 3(Median) - 2(Mean)"
   },
   {
     visual: "Letter Random Selection: Target word is 'PROBABILITY'",
@@ -113,152 +89,5 @@ const quizData = [
     question: "What is the correct actual mean?",
     options: ["42", "49", "43", "47"],
     answer: "43"
-  },
-  {
-    visual: "Average Shift: The mean of 5 numbers is 20. If one number is excluded, the mean of the remaining numbers becomes 23.",
-    question: "What is the value of the excluded number?",
-    options: ["4", "92", "100", "8"],
-    answer: "4"
   }
 ];
-
-// --- STATE VARIABLES ---
-let currentQuestionIndex = 0;
-let pointsScore = 0;
-let studentName = "";
-let isProcessingAnswer = false;
-
-// --- INITIALIZE IMMEDIATELY ---
-function initQuiz() {
-  const screens = {
-    loading: document.getElementById('loading-screen'),
-    login: document.getElementById('login-screen'),
-    game: document.getElementById('game-screen'),
-    score: document.getElementById('score-screen')
-  };
-
-  function switchScreen(screenKey) {
-    Object.keys(screens).forEach(key => {
-      if(screens[key]) screens[key].classList.remove('active');
-    });
-    if(screens[screenKey]) screens[screenKey].classList.add('active');
-  }
-
-  // Auto transition from loading screen to name screen after 2 seconds
-  setTimeout(() => {
-    switchScreen('login');
-  }, 2000);
-
-  const nameInput = document.getElementById('student-name');
-  const startBtn = document.getElementById('start-btn');
-  const restartBtn = document.getElementById('restart-btn');
-
-  if(nameInput && startBtn) {
-    nameInput.addEventListener('input', (e) => {
-      startBtn.disabled = e.target.value.trim().length < 2;
-    });
-
-    startBtn.addEventListener('click', () => {
-      studentName = nameInput.value.trim();
-      const nameDisplay = document.getElementById('display-student-name');
-      if(nameDisplay) {
-        nameDisplay.innerHTML = `Student: ${studentName} &nbsp;&nbsp; <span id="score-counter">Points: 0</span>`;
-      }
-      switchScreen('game');
-      loadQuestion();
-    });
-  }
-
-  if(restartBtn) {
-    restartBtn.addEventListener('click', () => {
-      currentQuestionIndex = 0;
-      pointsScore = 0;
-      if(nameInput) nameInput.value = "";
-      if(startBtn) startBtn.disabled = true;
-      switchScreen('login');
-    });
-  }
-
-  function loadQuestion() {
-    isProcessingAnswer = false;
-    const currentQuestion = quizData[currentQuestionIndex];
-    
-    const progressEl = document.getElementById('progress');
-    const visualEl = document.getElementById('data-visual');
-    const textEl = document.getElementById('question-text');
-    const optionsContainer = document.getElementById('options-container');
-
-    if(progressEl) progressEl.innerText = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
-    if(visualEl) visualEl.innerText = currentQuestion.visual;
-    if(textEl) textEl.innerText = currentQuestion.question;
-    
-    if(optionsContainer) {
-      optionsContainer.innerHTML = "";
-      currentQuestion.options.forEach(option => {
-        const btn = document.createElement('button');
-        btn.classList.add('option-btn');
-        btn.innerText = option;
-        btn.addEventListener('click', (e) => handleAnswerSubmit(option, e.target));
-        optionsContainer.appendChild(btn);
-      });
-    }
-  }
-
-  function handleAnswerSubmit(selectedOption, clickedButton) {
-    if (isProcessingAnswer) return; 
-    isProcessingAnswer = true; 
-
-    const currentQuestion = quizData[currentQuestionIndex];
-    const allButtons = document.querySelectorAll('.option-btn');
-    
-    allButtons.forEach(btn => btn.disabled = true);
-
-    if (selectedOption === currentQuestion.answer) {
-      pointsScore++;
-      clickedButton.classList.add('correct-choice');
-      const counterEl = document.getElementById('score-counter');
-      if(counterEl) counterEl.innerText = `Points: ${pointsScore}`;
-    } else {
-      clickedButton.classList.add('incorrect-choice');
-      allButtons.forEach(btn => {
-        if (btn.innerText === currentQuestion.answer) {
-          btn.classList.add('correct-choice');
-        }
-      });
-    }
-    
-    setTimeout(() => {
-      currentQuestionIndex++;
-      if (currentQuestionIndex < quizData.length) {
-        loadQuestion();
-      } else {
-        switchScreen('score');
-        
-        const finalScoreEl = document.getElementById('final-score');
-        const totalScoreEl = document.getElementById('total-score');
-        const reportNameEl = document.getElementById('report-name');
-        const feedbackEl = document.getElementById('performance-feedback');
-
-        if(finalScoreEl) finalScoreEl.innerText = pointsScore;
-        if(totalScoreEl) totalScoreEl.innerText = quizData.length;
-        if(reportNameEl) reportNameEl.innerText = studentName;
-        
-        const percentage = (pointsScore / quizData.length) * 100;
-        let feedback = "";
-        
-        if (percentage === 100) {
-          feedback = "Excellent Master of Data Analytics! Perfect Score!";
-        } else if (percentage >= 70) {
-          feedback = "Good Data Interpreter. Keep practicing!";
-        } else {
-          feedback = "Needs review. Re-evaluate structural fundamentals.";
-        }
-        
-        if(feedbackEl) feedbackEl.innerText = feedback;
-      }
-    }, 1500);
-  }
-}
-
-// Run the script directly
-initQuiz();
