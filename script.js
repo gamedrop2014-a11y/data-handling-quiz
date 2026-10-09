@@ -1,4 +1,4 @@
-// --- PROJECT CONFIGURATION & DATA ---
+// --- PROJECT INITIAL CONFIGURATION & DATA ---
 const quizData = [
   {
     visual: "Scenario: Ashish studies for 4 hours, 5 hours, and 3 hours respectively on three consecutive days.",
@@ -91,3 +91,141 @@ const quizData = [
     answer: "1/3"
   }
 ];
+
+let currentQuestionIndex = 0;
+let score = 0;
+let studentName = "";
+
+// --- DOM ELEMENTS SELECTION ---
+const screens = {
+  loading: document.getElementById('loading-screen'),
+  login: document.getElementById('login-screen'),
+  game: document.getElementById('game-screen'),
+  score: document.getElementById('score-screen')
+};
+
+const inputName = document.getElementById('student-name');
+const startBtn = document.getElementById('start-btn');
+const restartBtn = document.getElementById('restart-btn');
+const displayName = document.getElementById('display-student-name');
+const scoreCounter = document.getElementById('score-counter');
+const progressText = document.getElementById('progress');
+const dataVisualBox = document.getElementById('data-visual');
+const questionTextBox = document.getElementById('question-text');
+const optionsContainer = document.getElementById('options-container');
+
+const finalScoreLabel = document.getElementById('final-score');
+const totalScoreLabel = document.getElementById('total-score');
+const reportNameLabel = document.getElementById('report-name');
+const performanceLabel = document.getElementById('performance-feedback');
+
+// --- APP FLOW DISPLAY SWITCHER ---
+function showScreen(targetScreen) {
+  Object.values(screens).forEach(screen => screen.classList.remove('active'));
+  targetScreen.classList.add('active');
+}
+
+// --- INITIALIZE APPLICATION STATE ---
+window.addEventListener('DOMContentLoaded', () => {
+  // Simulates modules runtime compilation checks 
+  setTimeout(() => {
+    showScreen(screens.login);
+  }, 1800);
+
+  // Sync up array dataset bounds to view components
+  totalScoreLabel.textContent = quizData.length;
+});
+
+// --- AUTHENTICATION INTERACTIVE LISTENERS ---
+inputName.addEventListener('input', () => {
+  const value = inputName.value.trim();
+  startBtn.disabled = value.length < 2;
+});
+
+startBtn.addEventListener('click', () => {
+  studentName = inputName.value.trim();
+  displayName.textContent = `Student: ${studentName}`;
+  currentQuestionIndex = 0;
+  score = 0;
+  scoreCounter.textContent = `Score: 0`;
+  showScreen(screens.game);
+  loadQuestion();
+});
+
+// --- ENGINE RUNTIME RENDERING LOGIC ---
+function loadQuestion() {
+  const currentData = quizData[currentQuestionIndex];
+  
+  // Update structural trackers dynamically
+  progressText.textContent = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+  
+  // Set question values
+  dataVisualBox.textContent = currentData.visual;
+  questionTextBox.textContent = currentData.question;
+  optionsContainer.innerHTML = '';
+
+  // Render randomized choices or native index structures safely
+  currentData.options.forEach(option => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = option;
+    btn.type = 'button';
+    btn.addEventListener('click', () => handleSelection(btn, option, currentData.answer));
+    optionsContainer.appendChild(btn);
+  });
+}
+
+// --- EVALUATION SELECTION CONTROL ---
+function handleSelection(selectedButton, selectedValue, correctValue) {
+  // Prevent evaluation double clicking anomalies
+  const allButtons = optionsContainer.querySelectorAll('.option-btn');
+  allButtons.forEach(btn => btn.disabled = true);
+
+  if (selectedValue === correctValue) {
+    score++;
+    scoreCounter.textContent = `Score: ${score}`;
+    selectedButton.classList.add('correct-choice');
+  } else {
+    selectedButton.classList.add('incorrect-choice');
+    // Reveal correct choice for optimal feedback loops
+    allButtons.forEach(btn => {
+      if (btn.textContent === correctValue) {
+        btn.classList.add('correct-choice');
+      }
+    });
+  }
+
+  // Smooth UI delay to check feedback before structural step progression
+  setTimeout(() => {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < quizData.length) {
+      loadQuestion();
+    } else {
+      renderSummaryReport();
+    }
+  }, 1200);
+}
+
+// --- TERMINAL SUMMARY PROCESSOR ---
+function renderSummaryReport() {
+  finalScoreLabel.textContent = score;
+  reportNameLabel.textContent = studentName;
+
+  const percentage = (score / quizData.length) * 100;
+  let feedback = "";
+
+  if (percentage === 100) feedback = "Perfect Score! Absolute Mastery.";
+  else if (percentage >= 80) feedback = "Excellent work! Strong analytical understanding.";
+  else if (percentage >= 50) feedback = "Good effort! Review missed terms to improve further.";
+  else feedback = "Needs Practice. Go back over Mean, Median, and Mode fundamentals.";
+
+  performanceLabel.textContent = feedback;
+  showScreen(screens.score);
+}
+
+// --- REBOOT ASSESSMENT RUNTIME SYSTEM ---
+restartBtn.addEventListener('click', () => {
+  inputName.value = '';
+  startBtn.disabled = true;
+  showScreen(screens.login);
+});
